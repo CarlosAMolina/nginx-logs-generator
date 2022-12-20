@@ -1,0 +1,6 @@
+# Rust
+/nginx-logs-generator/target
+
+# Vim
+*.swp
+
