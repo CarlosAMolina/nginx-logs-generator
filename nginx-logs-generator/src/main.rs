@@ -1,4 +1,7 @@
 use std::env;
+use std::fs::File;
+use std::io::prelude::*;
+use std::path::Path;
 use std::process;
 
 fn main() {
@@ -12,9 +15,20 @@ fn main() {
 }
 
 fn run(config: Config) {
+    let path = Path::new("/tmp/foo.txt");
+    let display = path.display();
+    let mut file = match File::create(path) {
+        Err(why) => panic!("couldn't create {}: {}", display, why),
+        Ok(file) => file,
+    };
     for file_size in config.files_size.iter() {
         println!("> {}", file_size);
+        let text_to_write: &str = "foo";
+        if let Err(e) = file.write_all(text_to_write.as_bytes()) {
+            panic!("couldn't write to {}: {}", display, e);
+        }
     }
+    println!("successfully wrote to {}", display);
 }
 
 struct Config {
