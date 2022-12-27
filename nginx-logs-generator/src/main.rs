@@ -18,17 +18,28 @@ struct Config {
 }
 
 impl Config {
-    fn new(args: &[String]) -> Result<Config, &'static str> {
+    fn new(args: &[String]) -> Result<Config, String> {
         if args.len() < 2 {
-            return Err("not enough arguments");
+            return Err("not enough arguments".to_string());
         }
         let args_without_script_name = &args[1..];
         let mut files_size = Vec::new();
         for arg in args_without_script_name.iter() {
-            // TODO improve error messages
-            let error_msg = format!("Argument `{}` cannot be converted to float", arg);
-            let file_size = arg.parse::<f32>().expect(&error_msg);
-            files_size.push(file_size);
+            let mut error_msg = format!("argument `{}` cannot be parsed", arg);
+            let arg_parsed = arg.parse::<f32>();
+            match arg_parsed {
+                Ok(file_size) => {
+                    if file_size <= 0.0 {
+                        error_msg = format!("{}, it must be greater than 0", error_msg);
+                        return Err(error_msg);
+                    }
+                    files_size.push(file_size);
+                }
+                Err(_) => {
+                    let error_msg = format!("{}, cannot be converted to float", error_msg);
+                    return Err(error_msg);
+                }
+            }
         }
         Ok(Config { files_size })
     }
