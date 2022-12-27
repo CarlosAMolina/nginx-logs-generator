@@ -1,4 +1,5 @@
 use std::env;
+use std::error::Error;
 use std::fs::File;
 use std::io::prelude::*;
 use std::path::Path;
@@ -11,24 +12,32 @@ fn main() {
         help();
         process::exit(1);
     });
-    run(config);
+    if let Err(e) = run(config) {
+        println!("Application error: {}", e);
+        process::exit(1);
+    }
 }
 
-fn run(config: Config) {
+fn run(config: Config) -> Result<(), Box<dyn Error>> {
     let path = Path::new("/tmp/foo.txt");
     let display = path.display();
     let mut file = match File::create(path) {
-        Err(why) => panic!("couldn't create {}: {}", display, why),
+        Err(why) => {
+            let error_msg = format!("couldn't create {}: {}", display, why);
+            return Err(error_msg.into());
+        },
         Ok(file) => file,
     };
     for file_size in config.files_size.iter() {
         println!("> {}", file_size);
-        let text_to_write: &str = "foo";
-        if let Err(e) = file.write_all(text_to_write.as_bytes()) {
-            panic!("couldn't write to {}: {}", display, e);
+        let text_to_write: &str = "foo\n";
+        if let Err(why) = file.write_all(text_to_write.as_bytes()) {
+            let error_msg = format!("couldn't write to {}: {}", display, why);
+            return Err(error_msg.into());
         }
     }
-    println!("successfully wrote to {}", display);
+    println!("Successfully wrote to {}", display);
+    Ok(())
 }
 
 struct Config {
