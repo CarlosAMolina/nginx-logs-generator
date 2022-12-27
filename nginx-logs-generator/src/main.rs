@@ -3,7 +3,11 @@ use std::process;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
-    let config = Config::new(&args);
+    let config = Config::new(&args).unwrap_or_else(|err| {
+        println!("Problem parsing arguments: {}", err);
+        help();
+        process::exit(1);
+    });
     for file_size in config.files_size.iter() {
         println!("> {}", file_size);
     }
@@ -14,11 +18,9 @@ struct Config {
 }
 
 impl Config {
-    fn new(args: &[String]) -> Config {
+    fn new(args: &[String]) -> Result<Config, &'static str> {
         if args.len() < 2 {
-            eprintln!("Problem parsing arguments");
-            help();
-            process::exit(1);
+            return Err("not enough arguments");
         }
         let args_without_script_name = &args[1..];
         let mut files_size = Vec::new();
@@ -27,7 +29,7 @@ impl Config {
             let file_size = arg.parse::<f32>().expect("Failed to convert argument to float");
             files_size.push(file_size);
         }
-        Config { files_size }
+        Ok(Config { files_size })
     }
 
 }
