@@ -8,6 +8,10 @@ fn main() {
         help();
         process::exit(1);
     });
+    run(config);
+}
+
+fn run(config: Config) {
     for file_size in config.files_size.iter() {
         println!("> {}", file_size);
     }
