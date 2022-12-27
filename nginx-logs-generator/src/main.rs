@@ -26,12 +26,12 @@ impl Config {
         let mut files_size = Vec::new();
         for arg in args_without_script_name.iter() {
             // TODO improve error messages
-            let file_size = arg.parse::<f32>().expect("Failed to convert argument to float");
+            let error_msg = format!("Argument `{}` cannot be converted to float", arg);
+            let file_size = arg.parse::<f32>().expect(&error_msg);
             files_size.push(file_size);
         }
         Ok(Config { files_size })
     }
-
 }
 
 fn help() {
@@ -43,4 +43,3 @@ fn help() {
         cargo run 1.5 0.5 1"
     )
 }
-
