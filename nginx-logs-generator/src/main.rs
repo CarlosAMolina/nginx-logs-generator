@@ -8,7 +8,7 @@ fn main() {
         help();
         process::exit(1);
     }
-    let config = parse_config(&args);
+    let config = Config::new(&args);
     for file_size in config.files_size.iter() {
         println!("> {}", file_size);
     }
@@ -18,15 +18,18 @@ struct Config {
     files_size: Vec<f32>,
 }
 
-fn parse_config(args: &[String]) -> Config {
-    let args_without_script_name = &args[1..];
-    let mut files_size = Vec::new();
-    for arg in args_without_script_name.iter() {
-        // TODO improve error messages
-        let file_size = arg.parse::<f32>().expect("Failed to convert argument to float");
-        files_size.push(file_size);
+impl Config {
+    fn new(args: &[String]) -> Config {
+        let args_without_script_name = &args[1..];
+        let mut files_size = Vec::new();
+        for arg in args_without_script_name.iter() {
+            // TODO improve error messages
+            let file_size = arg.parse::<f32>().expect("Failed to convert argument to float");
+            files_size.push(file_size);
+        }
+        Config { files_size }
     }
-    Config { files_size }
+
 }
 
 fn help() {
