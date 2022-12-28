@@ -61,7 +61,7 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
 }
 
 fn add_one_second(date: time::PrimitiveDateTime) -> time::PrimitiveDateTime {
-    datetime!(2019 - 11 - 26 18:31:01)
+    date.saturating_add(1.seconds())
 }
 
 #[cfg(test)]
