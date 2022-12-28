@@ -1,9 +1,7 @@
 use std::env;
-use std::error::Error;
-use std::fs::File;
-use std::io::prelude::*;
-use std::path::Path;
 use std::process;
+
+use nginx_logs_generator::Config;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
@@ -12,63 +10,9 @@ fn main() {
         help();
         process::exit(1);
     });
-    if let Err(e) = run(config) {
+    if let Err(e) = nginx_logs_generator::run(config) {
         println!("Application error: {}", e);
         process::exit(1);
-    }
-}
-
-fn run(config: Config) -> Result<(), Box<dyn Error>> {
-    let path = Path::new("/tmp/foo.txt");
-    let display = path.display();
-    let mut file = match File::create(path) {
-        Err(why) => {
-            let error_msg = format!("couldn't create {}: {}", display, why);
-            return Err(error_msg.into());
-        },
-        Ok(file) => file,
-    };
-    for file_size in config.files_size.iter() {
-        println!("> {}", file_size);
-        let text_to_write: &str = "foo\n";
-        if let Err(why) = file.write_all(text_to_write.as_bytes()) {
-            let error_msg = format!("couldn't write to {}: {}", display, why);
-            return Err(error_msg.into());
-        }
-    }
-    println!("Successfully wrote to {}", display);
-    Ok(())
-}
-
-struct Config {
-    files_size: Vec<f32>,
-}
-
-impl Config {
-    fn new(args: &[String]) -> Result<Config, String> {
-        if args.len() < 2 {
-            return Err("not enough arguments".to_string());
-        }
-        let args_without_script_name = &args[1..];
-        let mut files_size = Vec::new();
-        for arg in args_without_script_name.iter() {
-            let mut error_msg = format!("argument `{}` cannot be parsed", arg);
-            let arg_parsed = arg.parse::<f32>();
-            match arg_parsed {
-                Ok(file_size) => {
-                    if file_size <= 0.0 {
-                        error_msg = format!("{}, it must be greater than 0", error_msg);
-                        return Err(error_msg);
-                    }
-                    files_size.push(file_size);
-                }
-                Err(_) => {
-                    let error_msg = format!("{}, cannot be converted to float", error_msg);
-                    return Err(error_msg);
-                }
-            }
-        }
-        Ok(Config { files_size })
     }
 }
 
