@@ -3,6 +3,9 @@ use std::fs::File;
 use std::io::Write;
 use std::path::Path;
 
+use time::ext::NumericalDuration;
+use time::macros::datetime;
+
 pub struct Config {
     pub files_size: Vec<f32>,
 }
@@ -55,4 +58,19 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
     }
     println!("Successfully wrote to {}", display);
     Ok(())
+}
+
+fn add_one_second(date: time::PrimitiveDateTime) -> time::PrimitiveDateTime {
+    datetime!(2019 - 11 - 26 18:31:01)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn increase_date() {
+        let date = datetime!(2019 - 11 - 26 18:30:59);
+        assert_eq!(datetime!(2019 - 11 - 26 18:31:00), add_one_second(date));
+    }
 }
