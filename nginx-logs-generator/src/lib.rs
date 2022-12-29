@@ -60,8 +60,29 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
-fn add_one_second(date: time::PrimitiveDateTime) -> time::PrimitiveDateTime {
-    date.saturating_add(1.seconds())
+struct Date {
+    date: time::PrimitiveDateTime,
+}
+
+impl Date {
+    pub fn new(date: time::PrimitiveDateTime) -> Date {
+        Date { date }
+    }
+
+    pub fn date(&self) -> time::PrimitiveDateTime {
+        self.date
+    }
+
+    pub fn add_one_second(&self) -> time::PrimitiveDateTime {
+        self.date.saturating_add(1.seconds())
+    }
+
+    pub fn date_next_day(&self) -> time::PrimitiveDateTime {
+        let mut result = self.date.saturating_add(1.days());
+        result = result.replace_hour(0).unwrap();
+        result = result.replace_minute(0).unwrap();
+        result.replace_second(0).unwrap()
+    }
 }
 
 #[cfg(test)]
@@ -69,8 +90,14 @@ mod tests {
     use super::*;
 
     #[test]
-    fn increase_date() {
-        let date = datetime!(2019 - 11 - 26 18:30:59);
-        assert_eq!(datetime!(2019 - 11 - 26 18:31:00), add_one_second(date));
+    fn date_add_one_second() {
+        let date = Date::new(datetime!(2019 - 11 - 26 18:30:59));
+        assert_eq!(datetime!(2019 - 11 - 26 18:31:00), date.add_one_second());
+    }
+
+    #[test]
+    fn date_next_day() {
+        let date = Date::new(datetime!(2019 - 11 - 26 18:30:00));
+        assert_eq!(datetime!(2019 - 11 - 27 00:00:00), date.date_next_day());
     }
 }
