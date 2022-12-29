@@ -1,5 +1,4 @@
 use std::error::Error;
-use std::fmt;
 use std::fs::File;
 use std::io::Write;
 use std::path::Path;
@@ -53,9 +52,8 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
     let date = Date::new(datetime!(2022 - 01 - 01 00:00:00));
     for file_size in config.files_size.iter() {
         let log = Log::new(date.date);
-        println!("> {:?}", log);
-        let text_to_write: &str = "foo\n";
-        //if let Err(why) = file.write_all(log) {
+        let mut text_to_write = log.str();
+        text_to_write.push_str("\n");
         if let Err(why) = file.write_all(text_to_write.as_bytes()) {
             let error_msg = format!("couldn't write to {}: {}", display, why);
             return Err(error_msg.into());
@@ -90,7 +88,6 @@ impl Date {
     }
 }
 
-//#[derive(Debug, Serialize)]
 #[derive(Debug)]
 struct Log {
     pub date: time::PrimitiveDateTime,
@@ -100,15 +97,9 @@ impl Log {
     pub fn new(date: time::PrimitiveDateTime) -> Log {
         Log { date }
     }
-}
 
-impl fmt::Display for Log {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(
-            f,
-            "{},",
-            self.date,
-        )
+    pub fn str(&self) -> String {
+        format!("{}", self.date)
     }
 }
 
