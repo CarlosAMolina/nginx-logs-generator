@@ -49,8 +49,9 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
         Ok(file) => file,
     };
 
-    let date = Date::new(datetime!(2022 - 01 - 01 00:00:00));
+    let mut date = Date::new(datetime!(2022 - 01 - 01 00:00:00));
     for file_size in config.files_size.iter() {
+        println!("{}", date.date); // TODO
         let log = Log::new(date.date);
         let mut text_to_write = log.str();
         text_to_write.push_str("\n");
@@ -58,6 +59,7 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
             let error_msg = format!("couldn't write to {}: {}", display, why);
             return Err(error_msg.into());
         }
+        date.set_next_day();
     }
     println!("Successfully wrote to {}", display);
     Ok(())
@@ -76,15 +78,16 @@ impl Date {
         self.date
     }
 
-    pub fn add_one_second(&self) -> time::PrimitiveDateTime {
-        self.date.saturating_add(1.seconds())
+    pub fn add_one_second(&mut self) {
+        self.date = self.date.saturating_add(1.seconds());
     }
 
-    pub fn date_next_day(&self) -> time::PrimitiveDateTime {
+    pub fn set_next_day(&mut self) {
         let mut result = self.date.saturating_add(1.days());
         result = result.replace_hour(0).unwrap();
         result = result.replace_minute(0).unwrap();
-        result.replace_second(0).unwrap()
+        result.replace_second(0).unwrap();
+        self.date = result;
     }
 }
 
@@ -108,14 +111,22 @@ mod tests {
     use super::*;
 
     #[test]
-    fn date_add_one_second() {
-        let date = Date::new(datetime!(2019 - 11 - 26 18:30:59));
-        assert_eq!(datetime!(2019 - 11 - 26 18:31:00), date.add_one_second());
+    fn date_add_one_second_twice() {
+        let mut date = Date::new(datetime!(2019 - 11 - 26 18:30:59));
+
+        date.add_one_second();
+        assert_eq!(datetime!(2019 - 11 - 26 18:31:00), date.date());
+        date.add_one_second();
+        assert_eq!(datetime!(2019 - 11 - 26 18:31:01), date.date());
     }
 
     #[test]
-    fn date_next_day() {
-        let date = Date::new(datetime!(2019 - 11 - 26 18:30:00));
-        assert_eq!(datetime!(2019 - 11 - 27 00:00:00), date.date_next_day());
+    fn set_next_day_twice() {
+        let mut date = Date::new(datetime!(2019 - 11 - 26 18:30:00));
+        date.set_next_day();
+
+        assert_eq!(datetime!(2019 - 11 - 27 00:00:00), date.date());
+        date.set_next_day();
+        assert_eq!(datetime!(2019 - 11 - 28 00:00:00), date.date());
     }
 }
