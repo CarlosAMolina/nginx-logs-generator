@@ -103,7 +103,12 @@ impl Log {
     }
 
     pub fn str(&self) -> String {
-        format!("{}", self.date)
+        format!("{}", self.date())
+    }
+
+    fn date(&self) -> String {
+        let format = time::macros::format_description!("[[[day]/[month repr:short]/[year]:[hour]:[minute]:[second] +0100]");
+        self.date.format(&format).unwrap()
     }
 }
 
@@ -137,5 +142,12 @@ mod tests {
         date.add_one_second();
         date.set_next_day();
         assert_eq!(datetime!(2019 - 11 - 27 00:00:00), date.date());
+    }
+
+    #[test]
+    fn log_has_correct_format() {
+        let date = Date::new(datetime!(2021 - 12 - 16 00:07:02));
+        let log = Log::new(date.date);
+        assert_eq!("[16/Dec/2021:00:07:02 +0100]", log.str());
     }
 }
