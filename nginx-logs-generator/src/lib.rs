@@ -103,16 +103,27 @@ impl Log {
     }
 
     pub fn str(&self) -> String {
-        format!("{} {}", self.remote_addr(), self.date())
+        format!(r#"{} {} {} "{}""#, self.remote_addr(), self.remote_user(), self.time_local(),
+        self.request()
+
+        )
     }
 
-    fn date(&self) -> String {
+    fn time_local(&self) -> String {
         let format = time::macros::format_description!("[[[day]/[month repr:short]/[year]:[hour]:[minute]:[second] +0100]");
         self.date.format(&format).unwrap()
     }
 
     fn remote_addr(&self) -> String {
         "8.8.8.8".to_string()
+    }
+
+    fn request(&self) -> String {
+        "GET /index.html HTTP/1.1".to_string()
+    }
+
+    fn remote_user(&self) -> String {
+        "-".to_string()
     }
 }
 
@@ -152,6 +163,6 @@ mod tests {
     fn log_has_correct_format() {
         let date = Date::new(datetime!(2021 - 12 - 16 00:07:02));
         let log = Log::new(date.date);
-        assert_eq!("8.8.8.8 [16/Dec/2021:00:07:02 +0100]", log.str());
+        assert_eq!(r#"8.8.8.8 - [16/Dec/2021:00:07:02 +0100] "GET /index.html HTTP/1.1""#, log.str());
     }
 }
