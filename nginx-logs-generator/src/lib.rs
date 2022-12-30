@@ -54,7 +54,7 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
         for _ in 0..LINES_TO_WRITE_IN_EACH_CHECK {
             let log = Log::new(date.date);
             let mut text_to_write = log.str();
-            text_to_write.push_str("\n");
+            text_to_write.push('\n');
             if let Err(why) = file.write_all(text_to_write.as_bytes()) {
                 let error_msg = format!("couldn't write to {}: {}", display, why);
                 return Err(error_msg.into());
