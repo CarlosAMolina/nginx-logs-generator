@@ -50,10 +50,15 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
         Ok(file) => file,
     };
     let mut date = Date::new(datetime!(2022 - 01 - 01 00:00:00));
+    let number_of_files_to_create: u8 = config.files_size.len().try_into().unwrap();
+    let file_name_generator = FileNameGenerator::new(number_of_files_to_create);
     for file_size_to_create in config.files_size.iter() {
         let file_size_bytes = get_bytes_from_gigabytes(*file_size_to_create);
         let number_of_logs_to_write = get_number_of_logs_to_write(file_size_bytes);
-        println!("Creating file of {:?} GB, writing {:?} logs", file_size_to_create, number_of_logs_to_write);
+        println!(
+            "Creating file of {:?} GB, writing {:?} logs",
+            file_size_to_create, number_of_logs_to_write
+        );
         for _ in 0..number_of_logs_to_write {
             let log = Log::new(date.date);
             let mut text_to_write = log.str();
@@ -66,10 +71,16 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
         }
         let file_size_bytes_created = get_file_size_bytes(&file_path_name).unwrap();
         if file_size_bytes_created < file_size_bytes {
-            let error_msg = format!("couldn't create a file of {} bytes, {} bytes have been created", file_size_bytes, file_size_bytes_created);
+            let error_msg = format!(
+                "couldn't create a file of {} bytes, {} bytes have been created",
+                file_size_bytes, file_size_bytes_created
+            );
             return Err(error_msg.into());
         } else {
-            println!("The file `{}` of {} bytes has been created", display, file_size_bytes_created);
+            println!(
+                "The file `{}` of {} bytes has been created",
+                display, file_size_bytes_created
+            );
         }
         date.set_next_day();
     }
@@ -173,6 +184,32 @@ fn get_number_of_logs_to_write(file_size_bytes: u64) -> u64 {
     file_size_bytes / bytes_of_a_log + 1
 }
 
+struct FileNameGenerator {
+    name_suffix: u8,
+    number_of_files_to_create: u8,
+}
+
+impl FileNameGenerator {
+    pub fn new(number_of_files_to_create: u8) -> FileNameGenerator {
+        let name_suffix = number_of_files_to_create - 1;
+        FileNameGenerator {
+            name_suffix,
+            number_of_files_to_create,
+        }
+    }
+
+    pub fn name(&mut self) -> String {
+        let name_prefix = "access.log";
+        if self.name_suffix == 0 {
+            name_prefix.to_string()
+        } else {
+            let result = format!("{}.{}", name_prefix, self.name_suffix);
+            self.name_suffix -= 1;
+            result
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -213,5 +250,14 @@ mod tests {
             r#"8.8.8.8 - - [16/Dec/2021:00:07:02 +0100] "GET /index.html HTTP/1.1" 200 118 "http://foo-referer/login.asp" "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:71.0) Gecko/20100101 Firefox/71.0""#,
             log.str()
         );
+    }
+
+    #[test]
+    fn file_name_generator_creates_all_names_correctly() {
+        let number_of_files_to_create = 3;
+        let mut file_name_generator = FileNameGenerator::new(number_of_files_to_create);
+        assert_eq!("access.log.2", file_name_generator.name());
+        assert_eq!("access.log.1", file_name_generator.name());
+        assert_eq!("access.log", file_name_generator.name());
     }
 }
