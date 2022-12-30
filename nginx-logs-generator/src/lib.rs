@@ -49,9 +49,9 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
         Ok(file) => file,
     };
     let mut date = Date::new(datetime!(2022 - 01 - 01 00:00:00));
+    const LINES_TO_WRITE_IN_EACH_CHECK: i32 = 500;
     for file_size in config.files_size.iter() {
-        for _ in 1..500 {
-            println!("{}", date.date); // TODO
+        for _ in 0..LINES_TO_WRITE_IN_EACH_CHECK {
             let log = Log::new(date.date);
             let mut text_to_write = log.str();
             text_to_write.push_str("\n");
