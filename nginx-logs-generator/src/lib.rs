@@ -39,7 +39,8 @@ impl Config {
 }
 
 pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
-    let path = Path::new("/tmp/foo.txt");
+    let file_path_name = "/tmp/foo.txt".to_string();
+    let path = Path::new(&file_path_name);
     let display = path.display();
     let mut file = match File::create(path) {
         Err(why) => {
@@ -49,17 +50,24 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
         Ok(file) => file,
     };
     let mut date = Date::new(datetime!(2022 - 01 - 01 00:00:00));
-    const LOGS_TO_WRITE_IN_EACH_CHECK: i32 = 500;
+    let logs_to_write_in_each_check: i32 = 500;
     for file_size in config.files_size.iter() {
-        for _ in 0..LOGS_TO_WRITE_IN_EACH_CHECK {
-            let log = Log::new(date.date);
-            let mut text_to_write = log.str();
-            text_to_write.push('\n');
-            if let Err(why) = file.write_all(text_to_write.as_bytes()) {
-                let error_msg = format!("couldn't write to {}: {}", display, why);
-                return Err(error_msg.into());
+        println!("Creating file of {:?} GB", file_size);
+        let file_size_bytes = get_bytes_from_gigabytes(*file_size);
+        let mut file_size_created: u64 = 0;
+        while file_size_created < file_size_bytes {
+            for _ in 0..logs_to_write_in_each_check {
+                let log = Log::new(date.date);
+                let mut text_to_write = log.str();
+                text_to_write.push('\n');
+                if let Err(why) = file.write_all(text_to_write.as_bytes()) {
+                    let error_msg = format!("couldn't write to {}: {}", display, why);
+                    return Err(error_msg.into());
+                }
+                date.add_one_second();
             }
-            date.add_one_second();
+            file_size_created = get_file_size(&file_path_name).unwrap();
+            println!("{:?} / {:?}", file_size_created, file_size_bytes);
         }
         date.set_next_day();
     }
@@ -146,6 +154,17 @@ impl Log {
         );
         self.date.format(&format).unwrap()
     }
+}
+
+fn get_file_size(file_path_name: &str) -> std::io::Result<u64> {
+    let f = File::open(file_path_name)?;
+    let file_size = f.metadata().unwrap().len();
+    Ok(file_size)
+}
+
+fn get_bytes_from_gigabytes(gigabytes: f32) -> u64 {
+    let bytes = gigabytes * 1_000_000_000.0;
+    bytes as u64
 }
 
 #[cfg(test)]
