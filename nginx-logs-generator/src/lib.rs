@@ -104,18 +104,28 @@ impl Log {
 
     pub fn str(&self) -> String {
         format!(
-            r#"{} - {} {} "{}" {} {}"#,
+            r#"{} - {} {} "{}" {} {} "{}" "{}""#,
             self.remote_addr(),
             self.remote_user(),
             self.time_local(),
             self.request(),
             self.status(),
             self.body_bytes_sent(),
+            self.http_referer(),
+            self.http_user_agent(),
         )
     }
 
     fn body_bytes_sent(&self) -> String {
         "118".to_string()
+    }
+
+    fn http_referer(&self) -> String {
+        "http://foo-referer/login.asp".to_string()
+    }
+
+    fn http_user_agent(&self) -> String {
+        "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:71.0) Gecko/20100101 Firefox/71.0".to_string()
     }
 
     fn remote_addr(&self) -> String {
@@ -179,7 +189,7 @@ mod tests {
         let date = Date::new(datetime!(2021 - 12 - 16 00:07:02));
         let log = Log::new(date.date);
         assert_eq!(
-            r#"8.8.8.8 - - [16/Dec/2021:00:07:02 +0100] "GET /index.html HTTP/1.1" 200 118"#,
+            r#"8.8.8.8 - - [16/Dec/2021:00:07:02 +0100] "GET /index.html HTTP/1.1" 200 118 "http://foo-referer/login.asp" "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:71.0) Gecko/20100101 Firefox/71.0""#,
             log.str()
         );
     }
