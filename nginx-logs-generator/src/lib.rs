@@ -39,20 +39,21 @@ impl Config {
 }
 
 pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
-    let file_path_name = "/tmp/foo.txt".to_string();
-    let path = Path::new(&file_path_name);
-    let display = path.display();
-    let mut file = match File::create(path) {
-        Err(why) => {
-            let error_msg = format!("couldn't create {}: {}", display, why);
-            return Err(error_msg.into());
-        }
-        Ok(file) => file,
-    };
     let mut date = Date::new(datetime!(2022 - 01 - 01 00:00:00));
     let number_of_files_to_create: u8 = config.files_size.len().try_into().unwrap();
-    let file_name_generator = FileNameGenerator::new(number_of_files_to_create);
+    let mut file_name_generator = FileNameGenerator::new(number_of_files_to_create);
+    let folder_path_name = "/tmp";
     for file_size_to_create in config.files_size.iter() {
+        let file_path_name = format!("{}/{}", folder_path_name, file_name_generator.name());
+        let path = Path::new(&file_path_name);
+        let display = path.display();
+        let mut file = match File::create(path) {
+            Err(why) => {
+                let error_msg = format!("couldn't create {}: {}", display, why);
+                return Err(error_msg.into());
+            }
+            Ok(file) => file,
+        };
         let file_size_bytes = get_bytes_from_gigabytes(*file_size_to_create);
         let number_of_logs_to_write = get_number_of_logs_to_write(file_size_bytes);
         println!(
