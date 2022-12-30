@@ -104,19 +104,18 @@ impl Log {
 
     pub fn str(&self) -> String {
         format!(
-            r#"{} - {} {} "{}""#,
+            r#"{} - {} {} "{}" {} {}"#,
             self.remote_addr(),
             self.remote_user(),
             self.time_local(),
-            self.request()
+            self.request(),
+            self.status(),
+            self.body_bytes_sent(),
         )
     }
 
-    fn time_local(&self) -> String {
-        let format = time::macros::format_description!(
-            "[[[day]/[month repr:short]/[year]:[hour]:[minute]:[second] +0100]"
-        );
-        self.date.format(&format).unwrap()
+    fn body_bytes_sent(&self) -> String {
+        "118".to_string()
     }
 
     fn remote_addr(&self) -> String {
@@ -129,6 +128,17 @@ impl Log {
 
     fn remote_user(&self) -> String {
         "-".to_string()
+    }
+
+    fn status(&self) -> String {
+        "200".to_string()
+    }
+
+    fn time_local(&self) -> String {
+        let format = time::macros::format_description!(
+            "[[[day]/[month repr:short]/[year]:[hour]:[minute]:[second] +0100]"
+        );
+        self.date.format(&format).unwrap()
     }
 }
 
@@ -169,7 +179,7 @@ mod tests {
         let date = Date::new(datetime!(2021 - 12 - 16 00:07:02));
         let log = Log::new(date.date);
         assert_eq!(
-            r#"8.8.8.8 - - [16/Dec/2021:00:07:02 +0100] "GET /index.html HTTP/1.1""#,
+            r#"8.8.8.8 - - [16/Dec/2021:00:07:02 +0100] "GET /index.html HTTP/1.1" 200 118"#,
             log.str()
         );
     }
