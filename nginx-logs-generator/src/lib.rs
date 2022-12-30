@@ -187,16 +187,12 @@ fn get_number_of_logs_to_write(file_size_bytes: u64) -> u64 {
 
 struct FileNameGenerator {
     name_suffix: u8,
-    number_of_files_to_create: u8,
 }
 
 impl FileNameGenerator {
     pub fn new(number_of_files_to_create: u8) -> FileNameGenerator {
         let name_suffix = number_of_files_to_create - 1;
-        FileNameGenerator {
-            name_suffix,
-            number_of_files_to_create,
-        }
+        FileNameGenerator { name_suffix }
     }
 
     pub fn name(&mut self) -> String {
