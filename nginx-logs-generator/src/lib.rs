@@ -49,9 +49,9 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
         Ok(file) => file,
     };
     let mut date = Date::new(datetime!(2022 - 01 - 01 00:00:00));
-    const LINES_TO_WRITE_IN_EACH_CHECK: i32 = 500;
+    const LOGS_TO_WRITE_IN_EACH_CHECK: i32 = 500;
     for file_size in config.files_size.iter() {
-        for _ in 0..LINES_TO_WRITE_IN_EACH_CHECK {
+        for _ in 0..LOGS_TO_WRITE_IN_EACH_CHECK {
             let log = Log::new(date.date);
             let mut text_to_write = log.str();
             text_to_write.push('\n');
@@ -74,10 +74,6 @@ struct Date {
 impl Date {
     pub fn new(date: time::PrimitiveDateTime) -> Date {
         Date { date }
-    }
-
-    pub fn date(&self) -> time::PrimitiveDateTime {
-        self.date
     }
 
     pub fn add_one_second(&mut self) {
@@ -160,9 +156,9 @@ mod tests {
     fn date_add_one_second_twice() {
         let mut date = Date::new(datetime!(2019 - 11 - 26 18:30:59));
         date.add_one_second();
-        assert_eq!(datetime!(2019 - 11 - 26 18:31:00), date.date());
+        assert_eq!(datetime!(2019 - 11 - 26 18:31:00), date.date);
         date.add_one_second();
-        assert_eq!(datetime!(2019 - 11 - 26 18:31:01), date.date());
+        assert_eq!(datetime!(2019 - 11 - 26 18:31:01), date.date);
     }
 
     #[test]
@@ -170,9 +166,9 @@ mod tests {
         let mut date = Date::new(datetime!(2019 - 11 - 26 18:30:00));
         date.set_next_day();
 
-        assert_eq!(datetime!(2019 - 11 - 27 00:00:00), date.date());
+        assert_eq!(datetime!(2019 - 11 - 27 00:00:00), date.date);
         date.set_next_day();
-        assert_eq!(datetime!(2019 - 11 - 28 00:00:00), date.date());
+        assert_eq!(datetime!(2019 - 11 - 28 00:00:00), date.date);
     }
 
     #[test]
@@ -181,7 +177,7 @@ mod tests {
 
         date.add_one_second();
         date.set_next_day();
-        assert_eq!(datetime!(2019 - 11 - 27 00:00:00), date.date());
+        assert_eq!(datetime!(2019 - 11 - 27 00:00:00), date.date);
     }
 
     #[test]
