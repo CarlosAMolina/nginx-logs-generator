@@ -103,12 +103,16 @@ impl Log {
     }
 
     pub fn str(&self) -> String {
-        format!("{}", self.date())
+        format!("{} {}", self.remote_addr(), self.date())
     }
 
     fn date(&self) -> String {
         let format = time::macros::format_description!("[[[day]/[month repr:short]/[year]:[hour]:[minute]:[second] +0100]");
         self.date.format(&format).unwrap()
+    }
+
+    fn remote_addr(&self) -> String {
+        "8.8.8.8".to_string()
     }
 }
 
@@ -148,6 +152,6 @@ mod tests {
     fn log_has_correct_format() {
         let date = Date::new(datetime!(2021 - 12 - 16 00:07:02));
         let log = Log::new(date.date);
-        assert_eq!("[16/Dec/2021:00:07:02 +0100]", log.str());
+        assert_eq!("8.8.8.8 [16/Dec/2021:00:07:02 +0100]", log.str());
     }
 }
