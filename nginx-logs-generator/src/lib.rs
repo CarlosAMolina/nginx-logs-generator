@@ -207,6 +207,20 @@ impl FileNameGenerator {
     }
 }
 
+struct FileNameCompressor {
+    file_path_name: String,
+}
+
+impl FileNameCompressor {
+    pub fn new(file_path_name: String) -> FileNameCompressor {
+        FileNameCompressor { file_path_name }
+    }
+
+    pub fn must_compress_the_file(&self) -> bool {
+        !self.file_path_name.ends_with(".log") && !self.file_path_name.ends_with(".log.1")
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -256,5 +270,14 @@ mod tests {
         assert_eq!("access.log.2", file_name_generator.name());
         assert_eq!("access.log.1", file_name_generator.name());
         assert_eq!("access.log", file_name_generator.name());
+    }
+
+    #[test]
+    fn file_name_compressor_must_compress_the_file() {
+        assert!(!FileNameCompressor::new("/tmp/access.log".to_string()).must_compress_the_file());
+        assert!(!FileNameCompressor::new("/tmp/access.log.1".to_string()).must_compress_the_file());
+        assert!(FileNameCompressor::new("/tmp/access.log.2".to_string()).must_compress_the_file());
+        assert!(FileNameCompressor::new("/tmp/access.log.10".to_string()).must_compress_the_file());
+        assert!(FileNameCompressor::new("/tmp/access.log.11".to_string()).must_compress_the_file());
     }
 }
