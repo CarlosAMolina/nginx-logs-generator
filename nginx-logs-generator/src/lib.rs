@@ -1,4 +1,7 @@
+use flate2::write::GzEncoder;
+use flate2::Compression;
 use std::error::Error;
+use std::fs;
 use std::fs::File;
 use std::io::Write;
 use std::path::Path;
@@ -82,6 +85,11 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
                 "The file `{}` of {} bytes has been created",
                 display, file_size_bytes_created
             );
+        }
+        let file_compressor = FileCompressor::new(file_path_name);
+        if file_compressor.must_compress_the_file() {
+            println!("Compressing the file");
+            file_compressor.compress_file_as_gz()?;
         }
         date.set_next_day();
     }
@@ -207,17 +215,27 @@ impl FileNameGenerator {
     }
 }
 
-struct FileNameCompressor {
+struct FileCompressor {
     file_path_name: String,
 }
 
-impl FileNameCompressor {
-    pub fn new(file_path_name: String) -> FileNameCompressor {
-        FileNameCompressor { file_path_name }
+impl FileCompressor {
+    pub fn new(file_path_name: String) -> FileCompressor {
+        FileCompressor { file_path_name }
     }
 
     pub fn must_compress_the_file(&self) -> bool {
         !self.file_path_name.ends_with(".log") && !self.file_path_name.ends_with(".log.1")
+    }
+
+    pub fn compress_file_as_gz(&self) -> Result<(), std::io::Error> {
+        let path_name_compressed_file = format!("{}.gz", self.file_path_name);
+        let file_gz = File::create(path_name_compressed_file)?;
+        let mut enc = GzEncoder::new(file_gz, Compression::default());
+        let contents = fs::read_to_string(&self.file_path_name)?;
+        enc.write_all(contents.as_bytes())?;
+        enc.finish()?;
+        Ok(())
     }
 }
 
@@ -274,10 +292,10 @@ mod tests {
 
     #[test]
     fn file_name_compressor_must_compress_the_file() {
-        assert!(!FileNameCompressor::new("/tmp/access.log".to_string()).must_compress_the_file());
-        assert!(!FileNameCompressor::new("/tmp/access.log.1".to_string()).must_compress_the_file());
-        assert!(FileNameCompressor::new("/tmp/access.log.2".to_string()).must_compress_the_file());
-        assert!(FileNameCompressor::new("/tmp/access.log.10".to_string()).must_compress_the_file());
-        assert!(FileNameCompressor::new("/tmp/access.log.11".to_string()).must_compress_the_file());
+        assert!(!FileCompressor::new("/tmp/access.log".to_string()).must_compress_the_file());
+        assert!(!FileCompressor::new("/tmp/access.log.1".to_string()).must_compress_the_file());
+        assert!(FileCompressor::new("/tmp/access.log.2".to_string()).must_compress_the_file());
+        assert!(FileCompressor::new("/tmp/access.log.10".to_string()).must_compress_the_file());
+        assert!(FileCompressor::new("/tmp/access.log.11".to_string()).must_compress_the_file());
     }
 }
