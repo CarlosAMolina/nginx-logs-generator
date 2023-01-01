@@ -90,6 +90,7 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
         if file_compressor.must_compress_the_file() {
             println!("Compressing the file");
             file_compressor.compress_file_as_gz()?;
+            file_compressor.remove_original_file()?;
         }
         date.set_next_day();
     }
@@ -235,6 +236,11 @@ impl FileCompressor {
         let contents = fs::read_to_string(&self.file_path_name)?;
         enc.write_all(contents.as_bytes())?;
         enc.finish()?;
+        Ok(())
+    }
+
+    pub fn remove_original_file(&self) -> Result<(), std::io::Error> {
+        fs::remove_file(&self.file_path_name)?;
         Ok(())
     }
 }
