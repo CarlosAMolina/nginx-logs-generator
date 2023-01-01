@@ -45,7 +45,11 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
     let mut date = Date::new(datetime!(2022 - 01 - 01 00:00:00));
     let number_of_files_to_create: u8 = config.files_size.len().try_into().unwrap();
     let mut file_name_generator = FileNameGenerator::new(number_of_files_to_create);
-    let folder_path_name = "/tmp";
+    let folder_path_name = "/tmp/logs";
+    if Path::new(folder_path_name).exists() {
+        fs::remove_dir_all(folder_path_name)?;
+    }
+    fs::create_dir_all(folder_path_name)?;
     for file_size_to_create in config.files_size.iter() {
         let file_path_name = format!("{}/{}", folder_path_name, file_name_generator.name());
         let path = Path::new(&file_path_name);
