@@ -183,7 +183,6 @@ impl Log {
     #[cfg(not(test))]
     fn http_user_agent(&self) -> String {
         let choices = vec![
-        "python-requests/2.27.1".to_string(),
         "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:71.0) Gecko/20100101 Firefox/71.0".to_string(),
         "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.67 Safari/537.36".to_string(),
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.113 Safari/537.36".to_string(),
@@ -266,8 +265,8 @@ fn get_bytes_from_gigabytes(gigabytes: f32) -> u64 {
 }
 
 fn get_number_of_logs_to_write(file_size_bytes: u64) -> u64 {
-    let bytes_of_a_log = 186;
-    file_size_bytes / bytes_of_a_log + 1
+    let min_bytes_of_a_log = 149;
+    file_size_bytes / min_bytes_of_a_log + 1
 }
 
 struct FileNameGenerator {
