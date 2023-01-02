@@ -67,12 +67,11 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
             Ok(file) => file,
         };
         let file_size_bytes = get_bytes_from_gigabytes(*file_size_to_create);
-        let number_of_logs_to_write = get_number_of_logs_to_write(file_size_bytes);
         println!(
-            "Creating file of {:?} GB, writing {:?} logs",
-            file_size_to_create, number_of_logs_to_write
+            "Creating file of {:?} GB ({:?} Bytes)",
+            file_size_to_create, file_size_bytes
         );
-        for _ in 0..number_of_logs_to_write {
+        while file.metadata().unwrap().len() < file_size_bytes {
             let log = Log::new(date.date);
             let mut text_to_write = log.str();
             text_to_write.push('\n');
@@ -266,11 +265,6 @@ fn get_file_size_bytes(file_path_name: &str) -> std::io::Result<u64> {
 fn get_bytes_from_gigabytes(gigabytes: f32) -> u64 {
     let bytes = gigabytes * 1_000_000_000.0;
     bytes as u64
-}
-
-fn get_number_of_logs_to_write(file_size_bytes: u64) -> u64 {
-    let min_bytes_of_a_log = 149;
-    file_size_bytes / min_bytes_of_a_log + 1
 }
 
 struct FileNameGenerator {
