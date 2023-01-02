@@ -1,5 +1,8 @@
+#![allow(unused_imports)]
 use flate2::write::GzEncoder;
 use flate2::Compression;
+use rand::seq::SliceRandom;
+use rand::thread_rng;
 use std::error::Error;
 use std::fs;
 use std::fs::File;
@@ -146,32 +149,90 @@ impl Log {
         )
     }
 
-    fn body_bytes_sent(&self) -> String {
-        "118".to_string()
+    #[cfg(test)]
+    fn body_bytes_sent(&self) -> u16 {
+        118
+    }
+    #[cfg(not(test))]
+    fn body_bytes_sent(&self) -> u32 {
+        let choices = vec![77, 118, 150, 361, 125837];
+        self.get_random_vector_element(choices)
     }
 
+    #[allow(dead_code)]
+    fn get_random_vector_element<T: Clone>(&self, vector: Vec<T>) -> T {
+        let mut rng = thread_rng();
+        let result = vector.choose(&mut rng).unwrap();
+        result.clone()
+    }
+
+    #[cfg(test)]
     fn http_referer(&self) -> String {
         "http://foo-referer/login.asp".to_string()
     }
+    #[cfg(not(test))]
+    fn http_referer(&self) -> String {
+        let choices = vec!["-".to_string(), "http://foo-referer/login.asp".to_string()];
+        self.get_random_vector_element(choices)
+    }
 
+    #[cfg(test)]
     fn http_user_agent(&self) -> String {
         "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:71.0) Gecko/20100101 Firefox/71.0".to_string()
     }
+    #[cfg(not(test))]
+    fn http_user_agent(&self) -> String {
+        let choices = vec![
+        "python-requests/2.27.1".to_string(),
+        "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:71.0) Gecko/20100101 Firefox/71.0".to_string(),
+        "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.67 Safari/537.36".to_string(),
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.113 Safari/537.36".to_string(),
+        ];
+        self.get_random_vector_element(choices)
+    }
 
+    #[cfg(test)]
     fn remote_addr(&self) -> String {
         "8.8.8.8".to_string()
     }
+    #[cfg(not(test))]
+    fn remote_addr(&self) -> String {
+        let choices = vec!["1.2.3.4".to_string(), "8.8.8.8".to_string()];
+        self.get_random_vector_element(choices)
+    }
 
+    #[cfg(test)]
     fn request(&self) -> String {
         "GET /index.html HTTP/1.1".to_string()
     }
+    #[cfg(not(test))]
+    fn request(&self) -> String {
+        let choices = vec![
+            "GET / HTTP/1.1".to_string(),
+            "GET /index.html HTTP/1.1".to_string(),
+            "POST /foo/admin/formLogin HTTP/1.1".to_string(),
+        ];
+        self.get_random_vector_element(choices)
+    }
 
+    #[cfg(test)]
     fn remote_user(&self) -> String {
         "-".to_string()
     }
+    #[cfg(not(test))]
+    fn remote_user(&self) -> String {
+        let choices = vec!["-".to_string(), "root".to_string()];
+        self.get_random_vector_element(choices)
+    }
 
-    fn status(&self) -> String {
-        "200".to_string()
+    #[cfg(test)]
+    fn status(&self) -> u16 {
+        200
+    }
+    #[cfg(not(test))]
+    fn status(&self) -> u16 {
+        let choices = vec![200, 301, 400, 404, 405];
+        self.get_random_vector_element(choices)
     }
 
     fn time_local(&self) -> String {

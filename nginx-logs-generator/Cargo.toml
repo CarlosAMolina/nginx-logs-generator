@@ -7,4 +7,5 @@ edition = "2021"
 
 [dependencies]
 flate2 = { version = "1.0.25", features = ["zlib-ng"], default-features = false }
+rand = "0.8.5"
 time = { version = "0.3.17", features = ["formatting", "macros"] }
