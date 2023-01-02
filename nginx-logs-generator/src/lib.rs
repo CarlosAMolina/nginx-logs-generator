@@ -8,6 +8,7 @@ use std::fs;
 use std::fs::File;
 use std::io::Write;
 use std::path::Path;
+use std::time::Instant;
 
 use time::ext::NumericalDuration;
 use time::macros::datetime;
@@ -45,6 +46,7 @@ impl Config {
 }
 
 pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
+    let start = Instant::now();
     let mut date = Date::new(datetime!(2022 - 01 - 01 00:00:00));
     let number_of_files_to_create: u8 = config.files_size.len().try_into().unwrap();
     let mut file_name_generator = FileNameGenerator::new(number_of_files_to_create);
@@ -101,6 +103,8 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
         }
         date.set_next_day();
     }
+    let duration = start.elapsed();
+    println!("Time elapsed: {:?}", duration);
     Ok(())
 }
 
