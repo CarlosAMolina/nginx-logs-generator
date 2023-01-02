@@ -2,7 +2,7 @@
 use flate2::write::GzEncoder;
 use flate2::Compression;
 use rand::seq::SliceRandom;
-use rand::thread_rng;
+use rand::{thread_rng, Rng};
 use std::error::Error;
 use std::fs;
 use std::fs::File;
@@ -197,8 +197,19 @@ impl Log {
     }
     #[cfg(not(test))]
     fn remote_addr(&self) -> String {
-        let choices = vec!["1.2.3.4".to_string(), "8.8.8.8".to_string()];
-        self.get_random_vector_element(choices)
+        format!(
+            "{}.{}.{}.{}",
+            self.get_random_ip_v4_element(),
+            self.get_random_ip_v4_element(),
+            self.get_random_ip_v4_element(),
+            self.get_random_ip_v4_element(),
+        )
+    }
+
+    #[allow(dead_code)]
+    fn get_random_ip_v4_element(&self) -> u16 {
+        let mut rng = rand::thread_rng();
+        rng.gen_range(0..256)
     }
 
     #[cfg(test)]
