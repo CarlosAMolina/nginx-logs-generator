@@ -21,7 +21,7 @@ All files after the third one will be compressed.
 Example, executing the example command:
 
 ```bash
-cargo run 1.5 0.5 1
+cargo run /tmp 1.5 0.5 1
 ```
 
 These files will be created in `/tmp/logs`:
