@@ -4,27 +4,32 @@ This project generates Nginx logs.
 
 ## Run
 
-The logs will be created in the `/tmp/logs` folder.
+To know how to run the program, we can get help by typing:
+
+```bash
+$ cargo run
+Usage
+    cargo run String Vec<f32>
+        The first argument is the path where the `log` folder will be created to save the log files.
+        The next arguments are the size (Gigabyte) of each log file to be generated.
+    Example:
+        cargo run /tmp 1.5 0.5 1
+```
 
 All files after the third one will be compressed.
 
-Example, to create 3 log files of 1.5 GB, 0.5 GB and 1 GB:
+Example, executing the example command:
 
 ```bash
 cargo run 1.5 0.5 1
 ```
 
-The previous command will create these files:
+These files will be created in `/tmp/logs`:
 
 - access.log.2.gz, 110 MiB (1.4 GiB uncompressed).
 - access.log.1, 477 MiB.
 - access.log, 954 MiB.
 
-You can get help with:
-
-```bash
-cargo run
-```
 
 ## Test
 
