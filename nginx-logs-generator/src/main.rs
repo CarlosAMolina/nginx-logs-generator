@@ -19,9 +19,10 @@ fn main() {
 fn help() {
     eprintln!(
         "Usage
-    cargo run Vec<f32>
-        Arguments are the size (Gigabyte) of each log file to generate.
+    cargo run String Vec<f32>
+        The first argument is the path where the `log` folder will be created to save the log files.
+        The next arguments are the size (Gigabyte) of each log file to be generated.
     Example:
-        cargo run 1.5 0.5 1"
+        cargo run /tmp 1.5 0.5 1"
     )
 }

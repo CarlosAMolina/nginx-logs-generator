@@ -14,17 +14,19 @@ use time::ext::NumericalDuration;
 use time::macros::datetime;
 
 pub struct Config {
+    pub path_name: String,
     pub files_size: Vec<f32>,
 }
 
 impl Config {
     pub fn new(args: &[String]) -> Result<Config, String> {
-        if args.len() < 2 {
+        if args.len() < 3 {
             return Err("not enough arguments".to_string());
         }
-        let args_without_script_name = &args[1..];
+        let path_name = args[1].clone();
+        let args_files_size = &args[2..];
         let mut files_size = Vec::new();
-        for arg in args_without_script_name.iter() {
+        for arg in args_files_size.iter() {
             let mut error_msg = format!("argument `{}` cannot be parsed", arg);
             let arg_parsed = arg.parse::<f32>();
             match arg_parsed {
@@ -41,7 +43,10 @@ impl Config {
                 }
             }
         }
-        Ok(Config { files_size })
+        Ok(Config {
+            path_name,
+            files_size,
+        })
     }
 }
 
@@ -50,7 +55,11 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
     let mut date = Date::new(datetime!(2022 - 01 - 01 00:00:00));
     let number_of_files_to_create: u8 = config.files_size.len().try_into().unwrap();
     let mut file_name_generator = FileNameGenerator::new(number_of_files_to_create);
-    let folder_path_name = "/tmp/logs";
+    if Path::new(&config.path_name).exists() == false {
+        let error_msg = format!("the path does not exist: {}", config.path_name);
+        return Err(error_msg.into());
+    }
+    let folder_path_name = &format!("{}/logs", config.path_name);
     if Path::new(folder_path_name).exists() {
         fs::remove_dir_all(folder_path_name)?;
     }
